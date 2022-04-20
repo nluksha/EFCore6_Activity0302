@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32407.343
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryManager", "InventoryManager\InventoryManager.csproj", "{FB1097B3-DABE-454C-A90E-8D01CAE958D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryManager", "InventoryManager\InventoryManager.csproj", "{FB1097B3-DABE-454C-A90E-8D01CAE958D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryManager.DbLibrary", "InventoryManager.DbLibrary\InventoryManager.DbLibrary.csproj", "{6AFA415C-8619-487C-BD6F-5AD004528204}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryManager.DbLibrary", "InventoryManager.DbLibrary\InventoryManager.DbLibrary.csproj", "{6AFA415C-8619-487C-BD6F-5AD004528204}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryManager.Models", "InventoryManager.Models\InventoryManager.Models.csproj", "{078BE4E1-BC68-4E62-8823-E19B35EA9B52}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{6AFA415C-8619-487C-BD6F-5AD004528204}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6AFA415C-8619-487C-BD6F-5AD004528204}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6AFA415C-8619-487C-BD6F-5AD004528204}.Release|Any CPU.Build.0 = Release|Any CPU
+		{078BE4E1-BC68-4E62-8823-E19B35EA9B52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{078BE4E1-BC68-4E62-8823-E19B35EA9B52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{078BE4E1-BC68-4E62-8823-E19B35EA9B52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{078BE4E1-BC68-4E62-8823-E19B35EA9B52}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

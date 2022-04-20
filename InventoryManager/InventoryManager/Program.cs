@@ -9,6 +9,7 @@ DbContextOptionsBuilder<InventoryDbContext> optionsBuilder;
 
 BuildOptions();
 EnsureItems();
+ListInventory();
 
 void BuildOptions()
 {
@@ -39,5 +40,14 @@ void EnsureItem(string name)
             db.Items.Add(item);
             db.SaveChanges();
         }
+    }
+}
+
+void ListInventory()
+{
+    using (var db = new InventoryDbContext(optionsBuilder.Options))
+    {
+        var items = db.Items.OrderBy(x => x.Name).ToList();
+        items.ForEach(x => Console.WriteLine($"New Items: {x.Name}"));
     }
 }

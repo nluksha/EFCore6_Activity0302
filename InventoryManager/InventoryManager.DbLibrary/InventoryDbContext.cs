@@ -1,10 +1,13 @@
 ﻿using InventoryManager.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace InventoryManager.DbLibrary
 {
     public class InventoryDbContext : DbContext
     {
+        private static IConfigurationRoot configuration;
+
         public DbSet<Item> Items { get; set; }
 
         public InventoryDbContext()
@@ -20,7 +23,14 @@ namespace InventoryManager.DbLibrary
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Data Source=localhost; Initial Catalog=InventoryManager; Trusted_Connection=True");
+                var builder = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+
+                configuration = builder.Build();
+                var connectionString = configuration.GetConnectionString("InventoryManager");
+
+                optionsBuilder.UseSqlServer(connectionString);
             }
         }
     }

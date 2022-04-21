@@ -1,5 +1,6 @@
 ﻿using InventoryManager;
 using InventoryManager.DbLibrary;
+using InventoryManager.Helpers;
 using InventoryManager.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

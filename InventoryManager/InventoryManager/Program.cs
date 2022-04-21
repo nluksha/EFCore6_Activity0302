@@ -11,6 +11,7 @@ DbContextOptionsBuilder<InventoryDbContext> optionsBuilder;
 BuildOptions();
 EnsureItems();
 ListInventory();
+string s = null;
 
 void BuildOptions()
 {

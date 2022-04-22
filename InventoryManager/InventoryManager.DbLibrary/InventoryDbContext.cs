@@ -7,6 +7,7 @@ namespace InventoryManager.DbLibrary
     public class InventoryDbContext : DbContext
     {
         private static IConfigurationRoot configuration;
+        private const string systenUserId = "9164f960-7946-487a-aa77-c46e9a403568";
 
         public DbSet<Item> Items { get; set; }
 
@@ -32,6 +33,41 @@ namespace InventoryManager.DbLibrary
 
                 optionsBuilder.UseSqlServer(connectionString);
             }
+        }
+
+        public override int SaveChanges()
+        {
+            var tracker = ChangeTracker;
+
+            foreach (var entry in tracker.Entries())
+            {
+
+                if (entry.Entity is FullAuditModel referenceEntity)
+                {
+                    switch (entry.State)
+                    {
+                        case EntityState.Added:
+                            referenceEntity.CreatedDate = DateTime.Now;
+                            if (string.IsNullOrWhiteSpace(referenceEntity.CreatedByUserId))
+                            {
+                                referenceEntity.CreatedByUserId = systenUserId;
+                            }
+                            break;
+                        case EntityState.Modified:
+                        case EntityState.Deleted:
+                            referenceEntity.LastModifiedDate = DateTime.Now;
+                            if (string.IsNullOrWhiteSpace(referenceEntity.LastModifiedUserId))
+                            {
+                                referenceEntity.LastModifiedUserId = systenUserId;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            return base.SaveChanges();
         }
     }
 }

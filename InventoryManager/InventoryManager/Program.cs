@@ -9,6 +9,8 @@ IConfigurationRoot configuration;
 DbContextOptionsBuilder<InventoryDbContext> optionsBuilder;
 
 BuildOptions();
+
+DeleteAllItems();
 EnsureItems();
 ListInventory();
 
@@ -50,5 +52,16 @@ void ListInventory()
     {
         var items = db.Items.OrderBy(x => x.Name).ToList();
         items.ForEach(x => Console.WriteLine($"New Items: {x.Name}"));
+    }
+}
+
+void DeleteAllItems()
+{
+    using(var db = new InventoryDbContext(optionsBuilder.Options))
+    {
+        var items = db.Items.ToList();
+        db.Items.RemoveRange(items);
+
+        db.SaveChanges();
     }
 }

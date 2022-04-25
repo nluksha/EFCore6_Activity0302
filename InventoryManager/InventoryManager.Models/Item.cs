@@ -7,6 +7,7 @@ namespace InventoryManager.Models
         [StringLength(InventoryModelsConstans.MAX_NAME_LENGTH)]
         public string? Name { get; set; }
 
+        [Range(InventoryModelsConstans.MINIMUM_QAUNTITY, InventoryModelsConstans.MAXIMUM_QAUNTITY)]
         public int Quantity { get; set; }
 
         [StringLength(InventoryModelsConstans.MAX_DESCRIPTION_LENGTH)]
@@ -17,7 +18,11 @@ namespace InventoryManager.Models
         public bool IsOnSale { get; set; }
         public DateTime? PurchasedDate { get; set; }
         public DateTime? SoldDate { get; set; }
+
+        [Range(InventoryModelsConstans.MINIMUM_PRICE, InventoryModelsConstans.MAXIMUM_PRICE)]
         public decimal? PurchasePrice { get; set; }
+
+        [Range(InventoryModelsConstans.MINIMUM_PRICE, InventoryModelsConstans.MAXIMUM_PRICE)]
         public decimal? CurrentOrFinalPrice { get; set; }
     }
 }

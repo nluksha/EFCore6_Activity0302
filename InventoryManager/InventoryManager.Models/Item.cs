@@ -4,8 +4,9 @@ namespace InventoryManager.Models
 {
     public class Item: FullAuditModel
     {
+        [Required]
         [StringLength(InventoryModelsConstans.MAX_NAME_LENGTH)]
-        public string? Name { get; set; }
+        public string Name { get; set; }
 
         [Range(InventoryModelsConstans.MINIMUM_QAUNTITY, InventoryModelsConstans.MAXIMUM_QAUNTITY)]
         public int Quantity { get; set; }

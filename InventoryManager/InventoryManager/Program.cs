@@ -47,7 +47,7 @@ void EnsureItem(string name, string description, string notes)
                 Name = name,
                 CreatedByUserId = loggedInUserId,
                 IsActive = true,
-                Quantity = random.Next(),
+                Quantity = random.Next(1, 1000),
                 Description = description,
                 Notes = notes
             };

@@ -10,6 +10,7 @@ namespace InventoryManager.DbLibrary
         private const string systenUserId = "9164f960-7946-487a-aa77-c46e9a403568";
 
         public DbSet<Item> Items { get; set; }
+        public DbSet<Category> Categories { get; set; }
 
         public InventoryDbContext()
         {

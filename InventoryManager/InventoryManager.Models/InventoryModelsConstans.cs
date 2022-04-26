@@ -18,5 +18,8 @@ namespace InventoryManager.Models
         public const int MAXIMUM_QAUNTITY = 1000;
         public const double MINIMUM_PRICE = 0.0;
         public const double MAXIMUM_PRICE = 25_000.0;
+
+        public const int MAX_COLORLAVUE_LENGTH = 25;
+        public const int MAX_COLORNAME_LENGTH = 25;
     }
 }

@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using InventoryManager.Models.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManager.Models
 {
     [Table("ItemGenges")]
+    [Index(nameof(ItemId), nameof(GenreId), IsUnique = true)]
     public class ItemGenge: IIdentityModel
     {
         public int Id { get; set; }

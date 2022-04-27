@@ -37,6 +37,26 @@ namespace InventoryManager.DbLibrary
             }
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Item>()
+                .HasMany(x => x.Players)
+                .WithMany(p => p.Items)
+                .UsingEntity<Dictionary<string, object>>(
+                "ItemPlayers",
+                ip => ip.HasOne<Player>()
+                    .WithMany()
+                    .HasForeignKey("PlayerId")
+                    .HasConstraintName("FK_ItemPlayers_Players_PlayerId")
+                    .OnDelete(DeleteBehavior.Cascade),
+                ip => ip.HasOne<Item>()
+                    .WithMany()
+                    .HasForeignKey("ItemId")
+                    .HasConstraintName("FK_ItemPlayers_Items_ItemId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                );
+        }
+
         public override int SaveChanges()
         {
             var tracker = ChangeTracker;
@@ -71,5 +91,6 @@ namespace InventoryManager.DbLibrary
 
             return base.SaveChanges();
         }
+
     }
 }

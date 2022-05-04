@@ -16,6 +16,7 @@ BuildOptions();
 EnsureItems();
 UpdateItems();
 ListInventory();
+GetItemsForListing();
 
 void BuildOptions()
 {
@@ -90,5 +91,24 @@ void UpdateItems()
 
         db.Items.UpdateRange(items);
         db.SaveChanges();
+    }
+}
+
+void GetItemsForListing()
+{
+    using (var db = new InventoryDbContext(optionsBuilder.Options))
+    {
+        var res = db.ItemsForLisitng.FromSqlRaw("EXECUTE dbo.GetItemsForListing").ToList();
+
+        foreach (var item in res)
+        {
+            var output = $"ITEM {item.Name} {item.Description}";
+
+            if (!string.IsNullOrEmpty(item.CategoryName))
+            {
+                output = $"{output} has category: {item.CategoryName}";
+            }
+            Console.WriteLine(output);
+        }
     }
 }

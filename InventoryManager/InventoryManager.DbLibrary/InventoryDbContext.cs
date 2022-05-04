@@ -1,4 +1,5 @@
 ﻿using InventoryManager.Models;
+using InventoryManager.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -13,6 +14,9 @@ namespace InventoryManager.DbLibrary
         public DbSet<Category> Categories { get; set; }
         public DbSet<CategoryDetail> CategoryDetails { get; set; }
         public DbSet<Genre> Genres { get; set; }
+
+        // Stored Procedures
+        public DbSet<GetItemsForListingDto> ItemsForLisitng { get; set; }
 
         public InventoryDbContext()
         {
@@ -56,6 +60,13 @@ namespace InventoryManager.DbLibrary
                     .HasConstraintName("FK_ItemPlayers_Items_ItemId")
                     .OnDelete(DeleteBehavior.Cascade)
                 );
+
+            // Stored Procedures
+            modelBuilder.Entity<GetItemsForListingDto>(x =>
+            {
+                x.HasNoKey();
+                x.ToView("ItemsForLisitng");
+            });
         }
 
         public override int SaveChanges()

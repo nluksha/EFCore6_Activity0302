@@ -19,6 +19,7 @@ UpdateItems();
 ListInventory();
 GetItemsForListing();
 GetAllActiveItemsAsPipeDelimitedString();
+GetItemsTotalValues();
 
 void BuildOptions()
 {
@@ -124,5 +125,20 @@ void GetAllActiveItemsAsPipeDelimitedString()
         var res = db.AllItemsOutput.FromSqlRaw("SELECT [dbo].[ItemNamesPipeDeliminatedString] (@IsActive) AllItems", isActiveParm).FirstOrDefault();
 
         Console.WriteLine($"All ctive Items: {res.AllItems}");
+    }
+}
+
+void GetItemsTotalValues()
+{
+    using (var db = new InventoryDbContext(optionsBuilder.Options))
+    {
+        var isActiveParm = new SqlParameter("IsActive", 1);
+
+        var res = db.GetItemsTotalValues.FromSqlRaw("SELECT * FROM [dbo].[GetItemsTotalValue] (@IsActive)", isActiveParm).ToList();
+
+        foreach (var item in res)
+        {
+            Console.WriteLine($"New ITem {item.Id, -10} | {item.Name, -50} | {item.Quantity, -4} | {item.TotalValue, -5}");
+        }
     }
 }

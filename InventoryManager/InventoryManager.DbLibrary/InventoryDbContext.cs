@@ -20,6 +20,7 @@ namespace InventoryManager.DbLibrary
 
         // Functions
         public DbSet<AllItemsPipeDeliminatedStingDto> AllItemsOutput { get; set; }
+        public DbSet<GetItemsTotalValueDto> GetItemsTotalValues { get; set; }
 
         public InventoryDbContext()
         {
@@ -76,6 +77,11 @@ namespace InventoryManager.DbLibrary
             {
                 x.HasNoKey();
                 x.ToView("AllItemsOutput");
+            });
+            modelBuilder.Entity<GetItemsTotalValueDto>(x =>
+            {
+                x.HasNoKey();
+                x.ToView("GetItemsTotalValues");
             });
         }
 

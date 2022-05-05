@@ -18,6 +18,9 @@ namespace InventoryManager.DbLibrary
         // Stored Procedures
         public DbSet<GetItemsForListingDto> ItemsForLisitng { get; set; }
 
+        // Functions
+        public DbSet<AllItemsPipeDeliminatedStingDto> AllItemsOutput { get; set; }
+
         public InventoryDbContext()
         {
         }
@@ -66,6 +69,13 @@ namespace InventoryManager.DbLibrary
             {
                 x.HasNoKey();
                 x.ToView("ItemsForLisitng");
+            });
+
+            // Functions
+            modelBuilder.Entity<AllItemsPipeDeliminatedStingDto>(x =>
+            {
+                x.HasNoKey();
+                x.ToView("AllItemsOutput");
             });
         }
 

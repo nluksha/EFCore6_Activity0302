@@ -2,6 +2,7 @@
 using InventoryManager.DbLibrary;
 using InventoryManager.Helpers;
 using InventoryManager.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -17,6 +18,7 @@ EnsureItems();
 UpdateItems();
 ListInventory();
 GetItemsForListing();
+GetAllActiveItemsAsPipeDelimitedString();
 
 void BuildOptions()
 {
@@ -110,5 +112,17 @@ void GetItemsForListing()
             }
             Console.WriteLine(output);
         }
+    }
+}
+
+void GetAllActiveItemsAsPipeDelimitedString()
+{
+    using (var db = new InventoryDbContext(optionsBuilder.Options))
+    {
+        var isActiveParm = new SqlParameter("IsActive", 1);
+
+        var res = db.AllItemsOutput.FromSqlRaw("SELECT [dbo].[ItemNamesPipeDeliminatedString] (@IsActive) AllItems", isActiveParm).FirstOrDefault();
+
+        Console.WriteLine($"All ctive Items: {res.AllItems}");
     }
 }

@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryManager.DbLibrary"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryManager.Models", "InventoryManager.Models\InventoryManager.Models.csproj", "{078BE4E1-BC68-4E62-8823-E19B35EA9B52}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryManager.Helpers", "InventoryManager.Helpers\InventoryManager.Helpers.csproj", "{130DF72C-6415-4A05-B6B5-B9389F4D8D1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryManager.Helpers", "InventoryManager.Helpers\InventoryManager.Helpers.csproj", "{130DF72C-6415-4A05-B6B5-B9389F4D8D1C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryManager.Migrator", "InventoryManager.Migrator\InventoryManager.Migrator.csproj", "{336CCF4C-1D35-46C4-93B8-AD13B89D345B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{130DF72C-6415-4A05-B6B5-B9389F4D8D1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{130DF72C-6415-4A05-B6B5-B9389F4D8D1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{130DF72C-6415-4A05-B6B5-B9389F4D8D1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{336CCF4C-1D35-46C4-93B8-AD13B89D345B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{336CCF4C-1D35-46C4-93B8-AD13B89D345B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{336CCF4C-1D35-46C4-93B8-AD13B89D345B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{336CCF4C-1D35-46C4-93B8-AD13B89D345B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

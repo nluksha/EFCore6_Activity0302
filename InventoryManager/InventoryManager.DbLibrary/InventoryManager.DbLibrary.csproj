@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -11,6 +11,7 @@
     <None Remove="Migrations\Scripts\Functions\ItemNamesPipeDeliminatedString\ItemNamesPipeDeliminatedString.v0.sql" />
     <None Remove="Migrations\Scripts\Procedures\GetItemsForListing\GetItemsForListing.v0.sql" />
     <None Remove="Migrations\Scripts\Procedures\GetItemsForListing\GetItemsForListing.v1.sql" />
+    <None Remove="Migrations\Scripts\Views\FullItemDetails\FullItemDetails.v0.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,6 +22,7 @@
     <EmbeddedResource Include="Migrations\Scripts\Functions\ItemNamesPipeDeliminatedString\ItemNamesPipeDeliminatedString.v0.sql" />
     <EmbeddedResource Include="Migrations\Scripts\Procedures\GetItemsForListing\GetItemsForListing.v0.sql" />
     <EmbeddedResource Include="Migrations\Scripts\Procedures\GetItemsForListing\GetItemsForListing.v1.sql" />
+    <EmbeddedResource Include="Migrations\Scripts\Views\FullItemDetails\FullItemDetails.v0.sql" />
   </ItemGroup>
 
   <ItemGroup>

@@ -14,8 +14,11 @@ const string loggedInUserId = "cf1ef43f-2e84-4639-a2de-038f66f06cda";
 BuildOptions();
 
 // DeleteAllItems();
-EnsureItems();
-UpdateItems();
+
+// Moved to Migrator
+// EnsureItems();
+// UpdateItems();
+
 ListInventory();
 GetItemsForListing();
 GetAllActiveItemsAsPipeDelimitedString();

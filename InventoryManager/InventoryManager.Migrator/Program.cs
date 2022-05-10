@@ -14,6 +14,8 @@ BuildOptions();
 ApplyMigrations();
 ExecuteCustomSeedData();
 
+Console.WriteLine("DONE!");
+
 void BuildOptions()
 {
     configuration = ConfigurationBuilderSingleton.ConfigurationRoot;
@@ -35,5 +37,8 @@ void ExecuteCustomSeedData()
     {
         var categories = new BuildCategories(context);
         categories.ExecuteSeed();
+
+        var items = new BuildItems(context);
+        items.ExecuteSeed();
     }
 }

@@ -12,10 +12,15 @@ namespace InventoryManager.Models.DTOs
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public int CategoryId { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsDeleted { get; set; }
+        public string Notes { get; set; } = string.Empty;
+        public string CategoryName { get; set; } = string.Empty;
+        public DateTime CreatedDate { get; set; }
 
         public override string ToString()
         {
-            return $"{Name,-25} | {Description}";
+            return $"{Name,-25} | {Description, -50} has category: {CategoryName}";
         }
     }
 }

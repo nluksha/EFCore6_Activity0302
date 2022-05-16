@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using AutoMapper;
 using InventoryManager.Models.DTOs;
+using AutoMapper.QueryableExtensions;
 
 IConfigurationRoot configuration;
 DbContextOptionsBuilder<InventoryDbContext> optionsBuilder;
@@ -29,9 +30,12 @@ BuildMapper();
 // UpdateItems();
 
 ListInventory();
-GetItemsForListing();
-GetAllActiveItemsAsPipeDelimitedString();
-GetItemsTotalValues();
+//GetItemsForListing();
+//GetAllActiveItemsAsPipeDelimitedString();
+//GetItemsTotalValues();
+//GetItemsForListingLinq();
+ListInventoryWithProjection();
+ListCategoriesAndColors();
 
 void BuildOptions()
 {
@@ -95,7 +99,7 @@ void ListInventory()
         var items = db.Items.OrderBy(x => x.Name).ToList();
         var result = mapper.Map<List<Item>, List<ItemDto>>(items);
 
-        result.ForEach(x => Console.WriteLine($"New Itemsssss: {x}"));
+        result.ForEach(x => Console.WriteLine($"New Item: {x}"));
     }
 }
 
@@ -169,4 +173,62 @@ void GetItemsTotalValues()
             Console.WriteLine($"New ITem {item.Id, -10} | {item.Name, -50} | {item.Quantity, -4} | {item.TotalValue, -5}");
         }
     }
+}
+
+void GetItemsForListingLinq()
+{
+    var minDateValue = new DateTime(2021, 1, 1);
+    var maxDateValue = new DateTime(2024, 1, 1);
+
+    using (var db = new InventoryDbContext(optionsBuilder.Options))
+    {
+        var res = db.Items.Select(x => new ItemDto
+        {
+            CreatedDate = x.CreatedDate,
+            CategoryName = x.Category.Name,
+            Description = x.Description,
+            IsActive = x.IsActive,
+            IsDeleted = x.IsDeleted,
+            Name = x.Name,
+            Notes = x.Notes,
+            CategoryId = x.Category.Id,
+            Id = x.Id
+        })
+            .Where(x => x.CreatedDate >= minDateValue && x.CreatedDate <= maxDateValue)
+            .OrderBy(y => y.CategoryName)
+            .ThenBy(z => z.Name)
+            .ToList();
+
+        foreach (var item in res)
+        {
+            Console.WriteLine(item);
+        }
+    }
+}
+
+void ListInventoryWithProjection()
+{
+    using (var db = new InventoryDbContext(optionsBuilder.Options))
+    {
+        var items = db.Items
+            .OrderBy(x => x.Name)
+            .ProjectTo<ItemDto>(mapper.ConfigurationProvider)
+            .ToList();
+
+        items.ForEach(x => Console.WriteLine($"New Item: {x}"));
+    }
+}
+
+void ListCategoriesAndColors()
+{
+    using (var db = new InventoryDbContext(optionsBuilder.Options))
+    {
+        var res = db.Categories
+            .Include(x => x.CategoryDetail)
+            .ProjectTo<CategoryDto>(mapper.ConfigurationProvider)
+            .ToList();
+
+        res.ForEach(x => Console.WriteLine($"Category: {x.Category} is {x.CategoryDetail.Color}"));
+    }
+
 }

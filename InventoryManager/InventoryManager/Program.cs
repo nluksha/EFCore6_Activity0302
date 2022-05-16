@@ -5,13 +5,22 @@ using InventoryManager.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using AutoMapper;
+using InventoryManager.Models.DTOs;
 
 IConfigurationRoot configuration;
 DbContextOptionsBuilder<InventoryDbContext> optionsBuilder;
 const string systenUserId = "9164f960-7946-487a-aa77-c46e9a403568";
 const string loggedInUserId = "cf1ef43f-2e84-4639-a2de-038f66f06cda";
 
+//AutoMapper
+MapperConfiguration mapperConfig;
+IMapper mapper;
+IServiceProvider serviceProvider;
+
 BuildOptions();
+BuildMapper();
 
 // DeleteAllItems();
 
@@ -29,6 +38,20 @@ void BuildOptions()
     configuration = ConfigurationBuilderSingleton.ConfigurationRoot;
     optionsBuilder = new DbContextOptionsBuilder<InventoryDbContext>();
     optionsBuilder.UseSqlServer(configuration.GetConnectionString("InventoryManager"));
+}
+
+void BuildMapper()
+{
+    var services = new ServiceCollection();
+    services.AddAutoMapper(typeof(InventoryMapper));
+    serviceProvider = services.BuildServiceProvider();
+
+    mapperConfig = new MapperConfiguration(cfg =>
+    {
+        cfg.AddProfile<InventoryMapper>();
+    });
+    mapperConfig.AssertConfigurationIsValid();
+    mapper = mapperConfig.CreateMapper();
 }
 
 void EnsureItems()
@@ -70,7 +93,9 @@ void ListInventory()
     using (var db = new InventoryDbContext(optionsBuilder.Options))
     {
         var items = db.Items.OrderBy(x => x.Name).ToList();
-        items.ForEach(x => Console.WriteLine($"New Items: {x.Name}"));
+        var result = mapper.Map<List<Item>, List<ItemDto>>(items);
+
+        result.ForEach(x => Console.WriteLine($"New Itemsssss: {x}"));
     }
 }
 

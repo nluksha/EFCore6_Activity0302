@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InventoryManager.Models
 {
     public class Item: FullAuditModel
     {
         [Required]
+        [Column(TypeName = "VARCHAR")]
         [StringLength(InventoryModelsConstans.MAX_NAME_LENGTH)]
         public string Name { get; set; }
 

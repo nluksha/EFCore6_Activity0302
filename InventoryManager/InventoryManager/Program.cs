@@ -29,13 +29,13 @@ BuildMapper();
 // EnsureItems();
 // UpdateItems();
 
-ListInventory();
+//ListInventory();
 //GetItemsForListing();
-//GetAllActiveItemsAsPipeDelimitedString();
+GetAllActiveItemsAsPipeDelimitedString();
 //GetItemsTotalValues();
 //GetItemsForListingLinq();
-ListInventoryWithProjection();
-ListCategoriesAndColors();
+//ListInventoryWithProjection();
+//ListCategoriesAndColors();
 
 void BuildOptions()
 {
@@ -96,10 +96,17 @@ void ListInventory()
 {
     using (var db = new InventoryDbContext(optionsBuilder.Options))
     {
-        var items = db.Items.OrderBy(x => x.Name).ToList();
-        var result = mapper.Map<List<Item>, List<ItemDto>>(items);
+        var items = db.Items.OrderBy(x => x.Name).Take(20)
+            .Select(x => new ItemDto
+            {
+                Name = x.Name,
+                Description = x.Description
+            })
+            .ToList();
 
-        result.ForEach(x => Console.WriteLine($"New Item: {x}"));
+        // var result = mapper.Map<List<Item>, List<ItemDto>>(items);
+
+        items.ForEach(x => Console.WriteLine($"New Item: {x}"));
     }
 }
 
@@ -152,11 +159,13 @@ void GetAllActiveItemsAsPipeDelimitedString()
 {
     using (var db = new InventoryDbContext(optionsBuilder.Options))
     {
-        var isActiveParm = new SqlParameter("IsActive", 1);
+        //var isActiveParm = new SqlParameter("IsActive", 1);
+        //var res = db.AllItemsOutput.FromSqlRaw("SELECT [dbo].[ItemNamesPipeDeliminatedString] (@IsActive) AllItems", isActiveParm).FirstOrDefault();
 
-        var res = db.AllItemsOutput.FromSqlRaw("SELECT [dbo].[ItemNamesPipeDeliminatedString] (@IsActive) AllItems", isActiveParm).FirstOrDefault();
+        var result = db.Items.Where(x => x.IsActive).Select(x => x.Name).ToList();
+        var pipeDelimitedString = string.Join("| ", result);
 
-        Console.WriteLine($"All ctive Items: {res.AllItems}");
+        Console.WriteLine($"All ctive Items: {pipeDelimitedString}");
     }
 }
 
@@ -182,7 +191,9 @@ void GetItemsForListingLinq()
 
     using (var db = new InventoryDbContext(optionsBuilder.Options))
     {
-        var res = db.Items.Select(x => new ItemDto
+        var res = db.Items
+            .Include(x => x.Category).ToList() // for fixing encripting essue
+            .Select(x => new ItemDto
         {
             CreatedDate = x.CreatedDate,
             CategoryName = x.Category.Name,
@@ -211,11 +222,12 @@ void ListInventoryWithProjection()
     using (var db = new InventoryDbContext(optionsBuilder.Options))
     {
         var items = db.Items
-            .OrderBy(x => x.Name)
+            //.OrderBy(x => x.Name)
             .ProjectTo<ItemDto>(mapper.ConfigurationProvider)
             .ToList();
 
-        items.ForEach(x => Console.WriteLine($"New Item: {x}"));
+        items.OrderBy(x => x.Name).ToList()
+            .ForEach(x => Console.WriteLine($"New Item: {x}"));
     }
 }
 

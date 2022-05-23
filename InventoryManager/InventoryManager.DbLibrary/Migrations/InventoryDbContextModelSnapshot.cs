@@ -57,7 +57,7 @@ namespace InventoryManager.DbLibrary.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("InventoryManager.Models.CategoryDetail", b =>
@@ -77,7 +77,7 @@ namespace InventoryManager.DbLibrary.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CategoryDetails");
+                    b.ToTable("CategoryDetails", (string)null);
                 });
 
             modelBuilder.Entity("InventoryManager.Models.DTOs.AllItemsPipeDeliminatedStingDto", b =>
@@ -175,7 +175,7 @@ namespace InventoryManager.DbLibrary.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genres");
+                    b.ToTable("Genres", (string)null);
 
                     b.HasData(
                         new
@@ -286,7 +286,7 @@ namespace InventoryManager.DbLibrary.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Items");
+                    b.ToTable("Items", (string)null);
                 });
 
             modelBuilder.Entity("InventoryManager.Models.ItemGenge", b =>
@@ -310,7 +310,7 @@ namespace InventoryManager.DbLibrary.Migrations
                     b.HasIndex("ItemId", "GenreId")
                         .IsUnique();
 
-                    b.ToTable("ItemGenges");
+                    b.ToTable("ItemGenges", (string)null);
                 });
 
             modelBuilder.Entity("InventoryManager.Models.Player", b =>
@@ -352,7 +352,7 @@ namespace InventoryManager.DbLibrary.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Players");
+                    b.ToTable("Players", (string)null);
                 });
 
             modelBuilder.Entity("ItemPlayers", b =>
@@ -367,7 +367,7 @@ namespace InventoryManager.DbLibrary.Migrations
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("ItemPlayers");
+                    b.ToTable("ItemPlayers", (string)null);
                 });
 
             modelBuilder.Entity("InventoryManager.Models.CategoryDetail", b =>

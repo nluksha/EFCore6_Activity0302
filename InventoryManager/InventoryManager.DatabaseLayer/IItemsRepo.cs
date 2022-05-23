@@ -1,4 +1,5 @@
-﻿using System;
+﻿using InventoryManager.Models.DTOs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,10 @@ namespace InventoryManager.DatabaseLayer
 {
     public interface IItemsRepo
     {
-
+        List<ItemDto> GetItems();
+        List<ItemDto> GetItemsByDateRange(DateTime minDateValue, DateTime maxDateValue);
+        List<GetItemsForListingDto> GetItemsForListingFromProcedure();
+        List<GetItemsTotalValueDto> GetItemsTotalValue(bool isActive);
+        List<FullItemDetailDto> GetItemsWithGenresAndCategories();
     }
 }

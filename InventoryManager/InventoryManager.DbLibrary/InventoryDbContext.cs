@@ -22,6 +22,9 @@ namespace InventoryManager.DbLibrary
         public DbSet<AllItemsPipeDeliminatedStingDto> AllItemsOutput { get; set; }
         public DbSet<GetItemsTotalValueDto> GetItemsTotalValues { get; set; }
 
+        // View
+        public DbSet<FullItemDetailDto> FullItemDetailDtos { get; set; }
+
         public InventoryDbContext()
         {
         }
@@ -84,10 +87,17 @@ namespace InventoryManager.DbLibrary
                 x.ToView("GetItemsTotalValues");
             });
 
+            //View
+            modelBuilder.Entity<FullItemDetailDto>(x =>
+            {
+                x.HasNoKey();
+                x.ToView("FullItemDetailDtos");
+            });
+
             // Seed Data
             var genreCreateDate = new DateTime(2021, 01, 01);
             modelBuilder.Entity<Genre>(x =>
-           {
+            {
                x.HasData(
                    new Genre { Id = 1, CreatedDate = genreCreateDate, IsActive = true, IsDeleted = false, Name = "Fantasy" },
                    new Genre { Id = 2, CreatedDate = genreCreateDate, IsActive = true, IsDeleted = false, Name = "Sci/Fi" },
@@ -95,7 +105,7 @@ namespace InventoryManager.DbLibrary
                    new Genre { Id = 4, CreatedDate = genreCreateDate, IsActive = true, IsDeleted = false, Name = "Comedy" },
                    new Genre { Id = 5, CreatedDate = genreCreateDate, IsActive = true, IsDeleted = false, Name = "Drama" }
                );
-           });
+            });
         }
 
         public override int SaveChanges()

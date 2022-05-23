@@ -9,11 +9,15 @@ using Microsoft.Extensions.DependencyInjection;
 using AutoMapper;
 using InventoryManager.Models.DTOs;
 using AutoMapper.QueryableExtensions;
+using InventoryManager.BusinessLayer;
 
 IConfigurationRoot configuration;
 DbContextOptionsBuilder<InventoryDbContext> optionsBuilder;
 const string systenUserId = "9164f960-7946-487a-aa77-c46e9a403568";
 const string loggedInUserId = "cf1ef43f-2e84-4639-a2de-038f66f06cda";
+
+IItemsService itemsService;
+ICategoriesService categoriesService;
 
 //AutoMapper
 MapperConfiguration mapperConfig;
@@ -23,19 +27,21 @@ IServiceProvider serviceProvider;
 BuildOptions();
 BuildMapper();
 
-// DeleteAllItems();
+using (var db = new InventoryDbContext(optionsBuilder.Options))
+{
+    itemsService = new ItemsService(db, mapper);
+    categoriesService = new CategoriesService(db, mapper);
 
-// Moved to Migrator
-// EnsureItems();
-// UpdateItems();
+    ListInventory();
+    GetItemsForListing();
+    GetAllActiveItemsAsPipeDelimitedString();
+    GetItemsTotalValues();
+    GetFullItemsDetails();
+    GetItemsForListingLinq();
+    ListCategoriesAndColors();
+}
 
-//ListInventory();
-//GetItemsForListing();
-GetAllActiveItemsAsPipeDelimitedString();
-//GetItemsTotalValues();
-//GetItemsForListingLinq();
-//ListInventoryWithProjection();
-//ListCategoriesAndColors();
+
 
 void BuildOptions()
 {
@@ -94,20 +100,8 @@ void EnsureItem(string name, string description, string notes)
 
 void ListInventory()
 {
-    using (var db = new InventoryDbContext(optionsBuilder.Options))
-    {
-        var items = db.Items.OrderBy(x => x.Name).Take(20)
-            .Select(x => new ItemDto
-            {
-                Name = x.Name,
-                Description = x.Description
-            })
-            .ToList();
-
-        // var result = mapper.Map<List<Item>, List<ItemDto>>(items);
-
-        items.ForEach(x => Console.WriteLine($"New Item: {x}"));
-    }
+    var res = itemsService.GetItems();
+    res.ForEach(x => Console.WriteLine($"New Item: {x}"));
 }
 
 void DeleteAllItems()
@@ -138,49 +132,42 @@ void UpdateItems()
 
 void GetItemsForListing()
 {
-    using (var db = new InventoryDbContext(optionsBuilder.Options))
+    var res = itemsService.GetItemsForListingFromProcedure();
+
+    foreach (var item in res)
     {
-        var res = db.ItemsForLisitng.FromSqlRaw("EXECUTE dbo.GetItemsForListing").ToList();
+        var output = $"ITEM {item.Name} {item.Description}";
 
-        foreach (var item in res)
+        if (!string.IsNullOrEmpty(item.CategoryName))
         {
-            var output = $"ITEM {item.Name} {item.Description}";
-
-            if (!string.IsNullOrEmpty(item.CategoryName))
-            {
-                output = $"{output} has category: {item.CategoryName}";
-            }
-            Console.WriteLine(output);
+            output = $"{output} has category: {item.CategoryName}";
         }
+        Console.WriteLine(output);
     }
 }
 
 void GetAllActiveItemsAsPipeDelimitedString()
 {
-    using (var db = new InventoryDbContext(optionsBuilder.Options))
-    {
-        //var isActiveParm = new SqlParameter("IsActive", 1);
-        //var res = db.AllItemsOutput.FromSqlRaw("SELECT [dbo].[ItemNamesPipeDeliminatedString] (@IsActive) AllItems", isActiveParm).FirstOrDefault();
-
-        var result = db.Items.Where(x => x.IsActive).Select(x => x.Name).ToList();
-        var pipeDelimitedString = string.Join("| ", result);
-
-        Console.WriteLine($"All ctive Items: {pipeDelimitedString}");
-    }
+    Console.WriteLine($"All ctive Items: {itemsService.GetAllItemsPipeDelimitedString()}");
 }
 
 void GetItemsTotalValues()
 {
-    using (var db = new InventoryDbContext(optionsBuilder.Options))
+    var res = itemsService.GetItemsTotalValue(true);
+
+    foreach (var item in res)
     {
-        var isActiveParm = new SqlParameter("IsActive", 1);
+        Console.WriteLine($"New ITem {item.Id,-10} | {item.Name,-50} | {item.Quantity,-4} | {item.TotalValue,-5}");
+    }
+}
 
-        var res = db.GetItemsTotalValues.FromSqlRaw("SELECT * FROM [dbo].[GetItemsTotalValue] (@IsActive)", isActiveParm).ToList();
+void GetFullItemsDetails()
+{
+    var res = itemsService.GetItemsWithGenresAndCategories();
 
-        foreach (var item in res)
-        {
-            Console.WriteLine($"New ITem {item.Id, -10} | {item.Name, -50} | {item.Quantity, -4} | {item.TotalValue, -5}");
-        }
+    foreach (var item in res)
+    {
+        Console.WriteLine($"New ITem {item.Id,-10} | {item.ItemName,-50} | {item.Category,-4} | {item.GenreName,-5}");
     }
 }
 
@@ -189,45 +176,13 @@ void GetItemsForListingLinq()
     var minDateValue = new DateTime(2021, 1, 1);
     var maxDateValue = new DateTime(2024, 1, 1);
 
-    using (var db = new InventoryDbContext(optionsBuilder.Options))
+    var res = itemsService.GetItemsByDateRange(minDateValue, maxDateValue)
+        .OrderBy(y => y.CategoryName)
+        .ThenBy(z => z.Name);
+
+    foreach (var item in res)
     {
-        var res = db.Items
-            .Include(x => x.Category).ToList() // for fixing encripting essue
-            .Select(x => new ItemDto
-        {
-            CreatedDate = x.CreatedDate,
-            CategoryName = x.Category.Name,
-            Description = x.Description,
-            IsActive = x.IsActive,
-            IsDeleted = x.IsDeleted,
-            Name = x.Name,
-            Notes = x.Notes,
-            CategoryId = x.Category.Id,
-            Id = x.Id
-        })
-            .Where(x => x.CreatedDate >= minDateValue && x.CreatedDate <= maxDateValue)
-            .OrderBy(y => y.CategoryName)
-            .ThenBy(z => z.Name)
-            .ToList();
-
-        foreach (var item in res)
-        {
-            Console.WriteLine(item);
-        }
-    }
-}
-
-void ListInventoryWithProjection()
-{
-    using (var db = new InventoryDbContext(optionsBuilder.Options))
-    {
-        var items = db.Items
-            //.OrderBy(x => x.Name)
-            .ProjectTo<ItemDto>(mapper.ConfigurationProvider)
-            .ToList();
-
-        items.OrderBy(x => x.Name).ToList()
-            .ForEach(x => Console.WriteLine($"New Item: {x}"));
+        Console.WriteLine(item);
     }
 }
 
@@ -235,12 +190,8 @@ void ListCategoriesAndColors()
 {
     using (var db = new InventoryDbContext(optionsBuilder.Options))
     {
-        var res = db.Categories
-            .Include(x => x.CategoryDetail)
-            .ProjectTo<CategoryDto>(mapper.ConfigurationProvider)
-            .ToList();
+        var res = categoriesService.ListCategoriesAndDetails();
 
         res.ForEach(x => Console.WriteLine($"Category: {x.Category} is {x.CategoryDetail.Color}"));
     }
-
 }

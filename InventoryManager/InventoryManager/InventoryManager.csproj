@@ -36,6 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\InventoryManager.BusinessLayer\InventoryManager.BusinessLayer.csproj" />
     <ProjectReference Include="..\InventoryManager.DbLibrary\InventoryManager.DbLibrary.csproj" />
     <ProjectReference Include="..\InventoryManager.Helpers\InventoryManager.Helpers.csproj" />
   </ItemGroup>

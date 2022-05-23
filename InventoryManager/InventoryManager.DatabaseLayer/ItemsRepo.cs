@@ -12,7 +12,7 @@ namespace InventoryManager.DatabaseLayer
         private readonly IMapper mapper;
         private readonly InventoryDbContext context;
 
-        public ItemsRepo(IMapper mapper, InventoryDbContext context)
+        public ItemsRepo(InventoryDbContext context, IMapper mapper)
         {
             this.mapper = mapper;
             this.context = context;

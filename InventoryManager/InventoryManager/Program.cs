@@ -42,19 +42,34 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     GetItemsForListingLinq();
     ListCategoriesAndColors();
 
-
+    // Insert
     Console.WriteLine("Would you like to create items?");
     var createItems = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
 
     if (createItems)
     {
-        Console.WriteLine("Adding new Item(s)?");
+        Console.WriteLine("Adding new Item(s)");
         CreateMultipleItems();
         Console.WriteLine("Items added");
 
         var inventory = itemsService.GetItems();
         inventory.ForEach(x => Console.WriteLine($"Item: {x}"));
     }
+
+    // Update
+    Console.WriteLine("Would you like tu update items?");
+    var updateItems = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+
+    if (updateItems)
+    {
+        Console.WriteLine("Update Items(s)");
+        UpdateMultipleItems();
+        Console.WriteLine("Items updated");
+
+        var inventory2 = itemsService.GetItems();
+        inventory2.ForEach(x => Console.WriteLine($"Item: {x}"));
+    }
+
 }
 
 void BuildOptions()
@@ -97,7 +112,8 @@ void EnsureItem(string name, string description, string notes)
 
         if (existingItem == null)
         {
-            var item = new Item { 
+            var item = new Item
+            {
                 Name = name,
                 CreatedByUserId = loggedInUserId,
                 IsActive = true,
@@ -120,7 +136,7 @@ void ListInventory()
 
 void DeleteAllItems()
 {
-    using(var db = new InventoryDbContext(optionsBuilder.Options))
+    using (var db = new InventoryDbContext(optionsBuilder.Options))
     {
         var items = db.Items.ToList();
         db.Items.RemoveRange(items);
@@ -218,7 +234,7 @@ void CreateMultipleItems()
     var allItems = new List<CreateOrUpdateItemDto>();
 
     bool createAnother = true;
-    while(createAnother)
+    while (createAnother)
     {
         var newItem = new CreateOrUpdateItemDto();
         Console.WriteLine("Createing a new item.");
@@ -266,5 +282,78 @@ int GetCategoryId(string input)
             return categories.FirstOrDefault(x => x.Category.ToLower().Equals("games"))?.Id ?? -1;
         default:
             return -1;
+    }
+}
+
+void UpdateMultipleItems()
+{
+    Console.WriteLine("Would you like to update items as a batch?");
+    bool batchUpdate = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+
+    var allItems = new List<CreateOrUpdateItemDto>();
+    bool updateAnother = true;
+
+    while (updateAnother == true)
+    {
+        Console.WriteLine("Items");
+        Console.WriteLine("Enter the ID number to update");
+        Console.WriteLine("*******************************");
+
+        var items = itemsService.GetItems();
+        items.ForEach(x => Console.WriteLine($"ID: {x.Id} | {x.Name}"));
+
+        Console.WriteLine("*******************************");
+
+        int id = 0;
+        if (int.TryParse(Console.ReadLine(), out id))
+        {
+            var itemMatch = items.FirstOrDefault(x => x.Id == id);
+
+            if (itemMatch != null)
+            {
+                var updItem = mapper.Map<CreateOrUpdateItemDto>(mapper.Map<Item>(itemMatch));
+
+                Console.WriteLine("Enter the new name [leave blank to keep existing]");
+                var newName = Console.ReadLine();
+                updItem.Name = !string.IsNullOrWhiteSpace(newName) ? newName : updItem.Name;
+
+                Console.WriteLine("Enter the new desc [leave blank to keep existing]");
+                var newDesc = Console.ReadLine();
+                updItem.Description = !string.IsNullOrWhiteSpace(newDesc) ? newDesc : updItem.Description;
+
+                Console.WriteLine("Enter the new notes [leave blank to keep existing]");
+                var newNotes = Console.ReadLine();
+                updItem.Notes = !string.IsNullOrWhiteSpace(newNotes) ? newNotes : updItem.Notes;
+
+                Console.WriteLine("Toggle Item Active Status? [y/n]");
+                var toggleActive = Console.ReadLine().Substring(0, 1).Equals("y", StringComparison.OrdinalIgnoreCase);
+
+                if (toggleActive)
+                {
+                    updItem.IsActive = !updItem.IsActive;
+                }
+
+                Console.WriteLine("Enter the category - [B]ooks, [M]ovies, [G]ames, or [N]o Change");
+                var userChoice = Console.ReadLine().Substring(0, 1).ToUpper();
+                updItem.CategoryId = userChoice.Equals("N", StringComparison.OrdinalIgnoreCase) ? itemMatch.CategoryId : GetCategoryId(userChoice);
+
+                if (!batchUpdate)
+                {
+                    itemsService.UpsertItem(updItem);
+                }
+                else
+                {
+                    allItems.Add(updItem);
+                }
+            }
+        }
+
+        Console.WriteLine("Would you like to update another?");
+        updateAnother = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+
+        if (batchUpdate && !updateAnother)
+        {
+            itemsService.UpsertItems(allItems);
+        }
     }
 }

@@ -165,7 +165,9 @@ namespace InventoryManager.DatabaseLayer
             context.Items.Add(item);
             context.SaveChanges();
 
-            var newItem = context.Items.FirstOrDefault(x => x.Name.ToLower().Equals(item.Name.ToLower()));
+            var newItem = context.Items
+                .ToList()
+                .FirstOrDefault(x => x.Name.ToLower().Equals(item.Name.ToLower()));
 
             if (newItem == null)
             {

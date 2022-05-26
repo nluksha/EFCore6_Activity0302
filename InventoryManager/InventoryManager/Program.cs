@@ -24,6 +24,8 @@ MapperConfiguration mapperConfig;
 IMapper mapper;
 IServiceProvider serviceProvider;
 
+List<CategoryDto> categories;
+
 BuildOptions();
 BuildMapper();
 
@@ -39,9 +41,21 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     GetFullItemsDetails();
     GetItemsForListingLinq();
     ListCategoriesAndColors();
+
+
+    Console.WriteLine("Would you like to create items?");
+    var createItems = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+
+    if (createItems)
+    {
+        Console.WriteLine("Adding new Item(s)?");
+        CreateMultipleItems();
+        Console.WriteLine("Items added");
+
+        var inventory = itemsService.GetItems();
+        inventory.ForEach(x => Console.WriteLine($"Item: {x}"));
+    }
 }
-
-
 
 void BuildOptions()
 {
@@ -191,7 +205,66 @@ void ListCategoriesAndColors()
     using (var db = new InventoryDbContext(optionsBuilder.Options))
     {
         var res = categoriesService.ListCategoriesAndDetails();
+        categories = res;
 
         res.ForEach(x => Console.WriteLine($"Category: {x.Category} is {x.CategoryDetail.Color}"));
+    }
+}
+
+void CreateMultipleItems()
+{
+    Console.WriteLine("Would you like to create items as a batch?");
+    var batchCreate = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+    var allItems = new List<CreateOrUpdateItemDto>();
+
+    bool createAnother = true;
+    while(createAnother)
+    {
+        var newItem = new CreateOrUpdateItemDto();
+        Console.WriteLine("Createing a new item.");
+
+        Console.WriteLine("Please enter the Name");
+        newItem.Name = Console.ReadLine();
+
+        Console.WriteLine("Please enter the Description");
+        newItem.Description = Console.ReadLine();
+
+        Console.WriteLine("Please enter the Notes");
+        newItem.Notes = Console.ReadLine();
+
+        Console.WriteLine("Please enter the Category [B]ooks, [M]ovies, [G]ames;");
+        newItem.CategoryId = GetCategoryId(Console.ReadLine().Substring(0, 1).ToUpper());
+
+        if (!batchCreate)
+        {
+            itemsService.UpsertItem(newItem);
+        }
+        else
+        {
+            allItems.Add(newItem);
+        }
+
+        Console.WriteLine("Would you like to create another items?");
+        createAnother = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+
+        if (batchCreate && !createAnother)
+        {
+            itemsService.UpsertItems(allItems);
+        }
+    }
+}
+
+int GetCategoryId(string input)
+{
+    switch (input)
+    {
+        case "B":
+            return categories.FirstOrDefault(x => x.Category.ToLower().Equals("books"))?.Id ?? -1;
+        case "M":
+            return categories.FirstOrDefault(x => x.Category.ToLower().Equals("movies"))?.Id ?? -1;
+        case "G":
+            return categories.FirstOrDefault(x => x.Category.ToLower().Equals("games"))?.Id ?? -1;
+        default:
+            return -1;
     }
 }

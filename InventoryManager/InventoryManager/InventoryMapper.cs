@@ -18,7 +18,11 @@ namespace InventoryManager
 
         private void CreateMaps()
         {
-            CreateMap<Item, ItemDto>();
+            CreateMap<Item, ItemDto>().ReverseMap();
+
+            CreateMap<Item, CreateOrUpdateItemDto>()
+                .ReverseMap()
+                .ForMember(x => x.Category, opt => opt.Ignore());
 
             CreateMap<Category, CategoryDto>()
                 .ForMember(x => x.Category, opt => opt.MapFrom(y => y.Name))

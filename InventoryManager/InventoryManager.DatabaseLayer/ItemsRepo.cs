@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using InventoryManager.Models;
 using System.Diagnostics;
+using System.Transactions;
 
 namespace InventoryManager.DatabaseLayer
 {
@@ -96,7 +97,7 @@ namespace InventoryManager.DatabaseLayer
 
         public void UpsertItems(List<Item> items)
         {
-            using (var transaction = context.Database.BeginTransaction())
+            using (var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }))
             {
                 try
                 {
@@ -110,13 +111,12 @@ namespace InventoryManager.DatabaseLayer
                         }
                     }
 
-                    transaction.Commit();
-                } 
+                    scope.Complete();
+                }
                 catch (Exception ex)
                 {
                     // log it:
                     Debug.WriteLine(ex.ToString());
-                    transaction.Rollback();
 
                     throw;
                 }
@@ -138,7 +138,7 @@ namespace InventoryManager.DatabaseLayer
 
         public void DeteleItems(List<int> itemIds)
         {
-            using (var transaction = context.Database.BeginTransaction())
+            using (var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }))
             {
                 try
                 {
@@ -147,13 +147,12 @@ namespace InventoryManager.DatabaseLayer
                         DeleteItem(id);
                     }
 
-                    transaction.Commit();
+                    scope.Complete();
                 }
                 catch (Exception ex)
                 {
                     // log it:
                     Debug.WriteLine(ex.ToString());
-                    transaction.Rollback();
 
                     throw;
                 }

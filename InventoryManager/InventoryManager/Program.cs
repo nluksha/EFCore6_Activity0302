@@ -70,6 +70,22 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
         inventory2.ForEach(x => Console.WriteLine($"Item: {x}"));
     }
 
+    // Delete
+    Console.WriteLine("Would you like tu delete items?");
+    var deleteItems = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+
+    if (deleteItems)
+    {
+        Console.WriteLine("Deleting Items(s)");
+        DeleteMultipleItems();
+        Console.WriteLine("Items deleted");
+
+        var inventory3 = itemsService.GetItems();
+        inventory3.ForEach(x => Console.WriteLine($"Item: {x}"));
+    }
+
+    Console.WriteLine("Program Completed");
+
 }
 
 void BuildOptions()
@@ -354,6 +370,76 @@ void UpdateMultipleItems()
         if (batchUpdate && !updateAnother)
         {
             itemsService.UpsertItems(allItems);
+        }
+    }
+}
+
+void DeleteMultipleItems()
+{
+    Console.WriteLine("Would you like to delete items as a batch?");
+    bool batchDelete = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+
+    var allItems = new List<int>(); 
+    bool deleteAnother = true; 
+    
+    while (deleteAnother == true)
+    {
+        Console.WriteLine("Items");
+        Console.WriteLine("Enter the ID number to delete"); 
+        Console.WriteLine("*******************************"); 
+
+        var items = itemsService.GetItems();
+        items.ForEach(x => Console.WriteLine($"ID: {x.Id} | {x.Name}"));
+
+        Console.WriteLine("*******************************"); 
+
+        if (batchDelete && allItems.Any())
+        {
+            Console.WriteLine("Items scheduled for delete"); 
+            allItems.ForEach(x => Console.Write($"{x},"));
+            Console.WriteLine(); 
+            Console.WriteLine("*******************************");
+        }
+
+        int id = 0;
+
+        if (int.TryParse(Console.ReadLine(), out id))
+        {
+            var itemMatch = items.FirstOrDefault(x => x.Id == id);
+            if (itemMatch != null)
+            {
+                if (batchDelete)
+                {
+                    if (!allItems.Contains(itemMatch.Id))
+                    {
+                        allItems.Add(itemMatch.Id);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Are you sure you want to delete the item {itemMatch.Id}-{itemMatch.Name}");
+                    if (Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase))
+                    {
+                        itemsService.DeleteItem(itemMatch.Id); 
+                        Console.WriteLine("Item Deleted");
+                    }
+                }
+            }
+        }
+
+        Console.WriteLine("Would you like to delete another item?");
+        deleteAnother = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+
+        if (batchDelete && !deleteAnother)
+        {
+            Console.WriteLine("Are you sure you want to delete the following items: ");
+            allItems.ForEach(x => Console.Write($"{x},"));
+            Console.WriteLine();
+
+            if (Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase))
+            {
+                itemsService.DeleteItems(allItems); Console.WriteLine("Items Deleted");
+            }
         }
     }
 }

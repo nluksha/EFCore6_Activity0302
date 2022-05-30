@@ -22,6 +22,12 @@ namespace InventoryManager.BusinessLayer
             dbRepo = new ItemsRepo(context, mapper);
         }
 
+        public ItemsService(IItemsRepo dbRepo, IMapper mapper)
+        {
+            this.mapper = mapper;
+            this.dbRepo = dbRepo;
+        }
+
         public string GetAllItemsPipeDelimitedString()
         {
             var items = GetItems();

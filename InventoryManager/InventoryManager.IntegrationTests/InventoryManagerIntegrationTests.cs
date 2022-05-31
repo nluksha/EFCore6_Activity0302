@@ -67,11 +67,53 @@ namespace InventoryManager.IntegrationTests
             // Arrange
             BuildDefaults();
 
-            using (var contect = new InventoryDbContext(options))
+            using (var context = new InventoryDbContext(options))
             {
                 // Act
+                dbRepo = new ItemsRepo(context, mapper);
+                var items = dbRepo.GetItems();
 
                 // Assert
+                items.ShouldNotBeNull();
+                items.Count.ShouldBe(3);
+
+                var first = items.First();
+                first.Name.ShouldBe(ITEM1_NAME);
+                first.Description.ShouldBe(ITEM1_DESC);
+                first.Notes.ShouldBe(ITEM1_NOTES);
+                first.Category.Name.ShouldBe(CAT1_NAME);
+
+                var second = items.SingleOrDefault(x => x.Name.ToLower() == ITEM2_NAME.ToLower());
+                second.ShouldNotBeNull();
+                second.Description.ShouldBe(ITEM2_DESC);
+                second.Notes.ShouldBe(ITEM2_NOTES);
+                second.Category.Name.ShouldBe(CAT2_NAME);
+            }
+        }
+
+        [Theory]
+        [InlineData(CAT1_NAME, COLOR_BLUE, COLOR_BLUE_VALUE)]
+        [InlineData(CAT2_NAME, COLOR_RED, COLOR_RED_VALUE)]
+        [InlineData(CAT3_NAME, COLOR_GREEN, COLOR_GREEN_VALUE)]
+        public void TestCategoryColors(string name, string color, string colorCalue)
+        {
+            // Arrange
+            BuildDefaults();
+
+            using (var context = new InventoryDbContext(options))
+            {
+                // Act
+                var categoriesRepo = new CategoriesRepo(context, mapper);
+                var categories = categoriesRepo.ListCategoriesAndDetails();
+
+                // Assert
+                categories.ShouldNotBeNull();
+                categories.Count.ShouldBe(3);
+
+                var category = categories.FirstOrDefault(x => x.Category.Equals(name));
+                category.ShouldNotBeNull();
+                category.CategoryDetail.Color.ShouldBe(color);
+                category.CategoryDetail.Value.ShouldBe(colorCalue);
             }
         }
 

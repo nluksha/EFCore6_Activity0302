@@ -7,6 +7,7 @@ using Microsoft.Data.SqlClient;
 using InventoryManager.Models;
 using System.Diagnostics;
 using System.Transactions;
+using System.Threading.Tasks;
 
 namespace InventoryManager.DatabaseLayer
 {
@@ -31,71 +32,125 @@ namespace InventoryManager.DatabaseLayer
             return items;
         }
         */
-        public List<Item> GetItems()
+        public async Task<List<Item>> GetItems()
         {
-            var items = context.Items
+            var items = await context.Items
                 .Include(x => x.Category)
-                .AsEnumerable()
                 .Where(x => !x.IsDeleted)
                 .OrderBy(x => x.Name)
-                .ToList();
+                .ToListAsync();
 
             return items;
         }
 
-        public List<ItemDto> GetItemsByDateRange(DateTime minDateValue, DateTime maxDateValue)
+        public async Task<List<ItemDto>> GetItemsByDateRange(DateTime minDateValue, DateTime maxDateValue)
         {
-            var items = context.Items
+            return await context.Items
                 .Include(x => x.Category)
                 .Where(x => x.CreatedDate >= minDateValue && x.CreatedDate <= maxDateValue)
                 .ProjectTo<ItemDto>(mapper.ConfigurationProvider)
-                .ToList();
-
-            return items;
+                .ToListAsync();
         }
 
-        public List<GetItemsForListingDto> GetItemsForListingFromProcedure()
+        public async Task<List<GetItemsForListingDto>> GetItemsForListingFromProcedure()
         {
-            return context.ItemsForLisitng
+            return await context.ItemsForLisitng
                 .FromSqlRaw("EXECUTE dbo.GetItemsForListing")
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<GetItemsTotalValueDto> GetItemsTotalValue(bool isActive)
+        public async Task<List<GetItemsTotalValueDto>> GetItemsTotalValue(bool isActive)
         {
             var isActiveParm = new SqlParameter("IsActive", isActive);
 
-            return context.GetItemsTotalValues
+            return await context.GetItemsTotalValues
                 .FromSqlRaw("SELECT * FROM [dbo].[GetItemsTotalValue] (@IsActive)", isActiveParm)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<FullItemDetailDto> GetItemsWithGenresAndCategories()
+        public async Task<List<FullItemDetailDto>> GetItemsWithGenresAndCategories()
         {
-            return context.FullItemDetailDtos
+            return await context.FullItemDetailDtos
                 .FromSqlRaw("SELECT * FROM [dbo].[vwFullItemDetails]")
-                .AsEnumerable()
                 .OrderBy(x => x.ItemName)
                 .ThenBy(x => x.GenreName)
                 .ThenBy(x => x.Category)
                 .ThenBy(x => x.PlayerName)
-                .ToList();
+                .ToListAsync();
         }
 
-        public int UpsertItem(Item item)
+        public async Task<int> UpsertItem(Item item)
         {
             if (item.Id > 0)
             {
-                return UpdateItem(item);
+                return await UpdateItem(item);
             }
             else
             {
-                return CreateItem(item);
+                return await CreateItem(item);
             }
         }
 
+        private async Task<int> CreateItem(Item item)
+        {
+            await context.Items.AddAsync(item);
+            await context.SaveChangesAsync();
 
-        public void UpsertItems(List<Item> items)
+            var newItem = await context.Items
+                .FirstOrDefaultAsync(x => x.Name.ToLower().Equals(item.Name.ToLower()));
+
+            if (newItem == null)
+            {
+                throw new Exception("Could not Create the item as expected");
+            }
+
+            return newItem.Id;
+        }
+
+        private async Task<int> UpdateItem(Item item)
+        {
+            var dbItem = await context.Items
+                .Include(x => x.Category)
+                .Include(x => x.ItemGenres)
+                .Include(x => x.Players)
+                .FirstOrDefaultAsync(x => x.Id == item.Id);
+
+            if (dbItem == null)
+            {
+                throw new Exception("Item not found");
+            }
+
+            dbItem.CategoryId = item.CategoryId;
+            dbItem.CurrentOrFinalPrice = item.CurrentOrFinalPrice;
+            dbItem.Description = item.Description;
+            dbItem.IsActive = item.IsActive;
+            dbItem.IsDeleted = item.IsDeleted;
+            dbItem.IsOnSale = item.IsOnSale;
+
+            if (item.ItemGenres != null)
+            {
+                dbItem.ItemGenres = item.ItemGenres;
+            }
+
+            dbItem.Name = item.Name;
+            dbItem.Notes = item.Notes;
+
+            if (item.Players != null)
+            {
+                dbItem.Players = item.Players;
+            }
+
+            dbItem.PurchasedDate = item.PurchasedDate;
+            dbItem.PurchasePrice = item.PurchasePrice;
+            dbItem.Quantity = item.Quantity;
+            dbItem.SoldDate = item.SoldDate;
+
+            await context.SaveChangesAsync();
+
+            return item.Id;
+        }
+
+        public async Task UpsertItems(List<Item> items)
         {
             using (var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }))
             {
@@ -103,7 +158,7 @@ namespace InventoryManager.DatabaseLayer
                 {
                     foreach (var item in items)
                     {
-                        var success = UpsertItem(item) > 0;
+                        var success = await UpsertItem(item) > 0;
 
                         if (!success)
                         {
@@ -123,20 +178,7 @@ namespace InventoryManager.DatabaseLayer
             }
         }
 
-        public void DeleteItem(int id)
-        {
-            var item  = context.Items.FirstOrDefault(x => x.Id == id);
-
-            if (item == null)
-            {
-                return;
-            }
-
-            item.IsDeleted = true;
-            context.SaveChanges();
-        }
-
-        public void DeteleItems(List<int> itemIds)
+        public async Task DeteleItems(List<int> itemIds)
         {
             using (var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }))
             {
@@ -144,7 +186,7 @@ namespace InventoryManager.DatabaseLayer
                 {
                     foreach (var id in itemIds)
                     {
-                        DeleteItem(id);
+                        await DeleteItem(id);
                     }
 
                     scope.Complete();
@@ -159,65 +201,17 @@ namespace InventoryManager.DatabaseLayer
             }
         }
 
-        private int CreateItem(Item item)
+        public async Task DeleteItem(int id)
         {
-            context.Items.Add(item);
-            context.SaveChanges();
+            var item = await context.Items.FirstOrDefaultAsync(x => x.Id == id);
 
-            var newItem = context.Items
-                .ToList()
-                .FirstOrDefault(x => x.Name.ToLower().Equals(item.Name.ToLower()));
-
-            if (newItem == null)
+            if (item == null)
             {
-                throw new Exception("Could not Create the item as expected");
+                return;
             }
 
-            return newItem.Id;
+            item.IsDeleted = true;
+            await context.SaveChangesAsync();
         }
-
-        private int UpdateItem(Item item)
-        {
-            var dbItem = context.Items
-                .Include(x => x.Category)
-                .Include(x => x.ItemGenres)
-                .Include(x => x.Players)
-                .FirstOrDefault(x => x.Id == item.Id);
-
-            if (dbItem == null)
-            {
-                throw new Exception("Item not found");
-            }
-
-            dbItem.CategoryId = item.CategoryId;
-            dbItem.CurrentOrFinalPrice = item.CurrentOrFinalPrice;
-            dbItem.Description = item.Description;
-            dbItem.IsActive = item.IsActive;
-            dbItem.IsDeleted = item.IsDeleted;
-            dbItem.IsOnSale = item.IsOnSale;
-            
-            if (item.ItemGenres != null)
-            { 
-                dbItem.ItemGenres = item.ItemGenres;
-            }
-
-            dbItem.Name = item.Name;
-            dbItem.Notes = item.Notes;
-            
-            if (item.Players != null)
-            {
-                dbItem.Players = item.Players;
-            
-            }
-            dbItem.PurchasedDate = item.PurchasedDate;
-            dbItem.PurchasePrice = item.PurchasePrice;
-            dbItem.Quantity = item.Quantity;
-            dbItem.SoldDate = item.SoldDate;
-            
-            context.SaveChanges();
-
-            return item.Id;
-        }
-
     }
 }

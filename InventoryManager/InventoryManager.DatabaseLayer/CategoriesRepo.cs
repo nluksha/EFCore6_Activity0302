@@ -22,12 +22,12 @@ namespace InventoryManager.DatabaseLayer
             this.context = context;
         }
 
-        public List<CategoryDto> ListCategoriesAndDetails()
+        public async Task<List<CategoryDto>> ListCategoriesAndDetails()
         {
-            return context.Categories
+            return await context.Categories
                 .Include(x => x.CategoryDetail)
                 .ProjectTo<CategoryDto>(mapper.ConfigurationProvider)
-                .ToList();
+                .ToListAsync();
         }
     }
 }

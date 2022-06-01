@@ -10,15 +10,15 @@ namespace InventoryManager.DatabaseLayer
 {
     public interface IItemsRepo
     {
-        List<Item> GetItems();
-        List<ItemDto> GetItemsByDateRange(DateTime minDateValue, DateTime maxDateValue);
-        List<GetItemsForListingDto> GetItemsForListingFromProcedure();
-        List<GetItemsTotalValueDto> GetItemsTotalValue(bool isActive);
-        List<FullItemDetailDto> GetItemsWithGenresAndCategories();
+        Task<List<Item>> GetItems();
+        Task<List<ItemDto>> GetItemsByDateRange(DateTime minDateValue, DateTime maxDateValue);
+        Task<List<GetItemsForListingDto>> GetItemsForListingFromProcedure();
+        Task<List<GetItemsTotalValueDto>> GetItemsTotalValue(bool isActive);
+        Task<List<FullItemDetailDto>> GetItemsWithGenresAndCategories();
 
-        int UpsertItem(Item item);
-        void UpsertItems(List<Item> items);
-        void DeleteItem(int id);
-        void DeteleItems(List<int> itemIds);
+        Task<int> UpsertItem(Item item);
+        Task UpsertItems(List<Item> items);
+        Task DeleteItem(int id);
+        Task DeteleItems(List<int> itemIds);
     }
 }

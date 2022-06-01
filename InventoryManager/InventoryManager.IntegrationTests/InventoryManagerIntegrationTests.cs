@@ -8,6 +8,7 @@ using InventoryManager.DbLibrary;
 using InventoryManager.DatabaseLayer;
 using InventoryManager.Models;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace InventoryManager.IntegrationTests
 {
@@ -62,7 +63,7 @@ namespace InventoryManager.IntegrationTests
         }
 
         [Fact]
-        public void TestGetItems()
+        public async Task TestGetItems()
         {
             // Arrange
             BuildDefaults();
@@ -71,7 +72,7 @@ namespace InventoryManager.IntegrationTests
             {
                 // Act
                 dbRepo = new ItemsRepo(context, mapper);
-                var items = dbRepo.GetItems();
+                var items = await dbRepo.GetItems();
 
                 // Assert
                 items.ShouldNotBeNull();
@@ -95,7 +96,7 @@ namespace InventoryManager.IntegrationTests
         [InlineData(CAT1_NAME, COLOR_BLUE, COLOR_BLUE_VALUE)]
         [InlineData(CAT2_NAME, COLOR_RED, COLOR_RED_VALUE)]
         [InlineData(CAT3_NAME, COLOR_GREEN, COLOR_GREEN_VALUE)]
-        public void TestCategoryColors(string name, string color, string colorCalue)
+        public async Task TestCategoryColors(string name, string color, string colorCalue)
         {
             // Arrange
             BuildDefaults();
@@ -104,7 +105,7 @@ namespace InventoryManager.IntegrationTests
             {
                 // Act
                 var categoriesRepo = new CategoriesRepo(context, mapper);
-                var categories = categoriesRepo.ListCategoriesAndDetails();
+                var categories = await categoriesRepo.ListCategoriesAndDetails();
 
                 // Assert
                 categories.ShouldNotBeNull();

@@ -24,7 +24,7 @@ MapperConfiguration mapperConfig;
 IMapper mapper;
 IServiceProvider serviceProvider;
 
-List<CategoryDto> categories;
+List<CategoryDto> categories = new List<CategoryDto>();
 
 BuildOptions();
 BuildMapper();
@@ -34,13 +34,13 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     itemsService = new ItemsService(db, mapper);
     categoriesService = new CategoriesService(db, mapper);
 
-    ListInventory();
-    GetItemsForListing();
-    GetAllActiveItemsAsPipeDelimitedString();
-    GetItemsTotalValues();
-    GetFullItemsDetails();
-    GetItemsForListingLinq();
-    ListCategoriesAndColors();
+    await ListInventory();
+    await GetItemsForListing();
+    await GetAllActiveItemsAsPipeDelimitedString();
+    await GetItemsTotalValues();
+    await GetFullItemsDetails();
+    await GetItemsForListingLinq();
+    await ListCategoriesAndColors();
 
     // Insert
     Console.WriteLine("Would you like to create items?");
@@ -49,10 +49,10 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     if (createItems)
     {
         Console.WriteLine("Adding new Item(s)");
-        CreateMultipleItems();
+        await CreateMultipleItems();
         Console.WriteLine("Items added");
 
-        var inventory = itemsService.GetItems();
+        var inventory = await itemsService.GetItems();
         inventory.ForEach(x => Console.WriteLine($"Item: {x}"));
     }
 
@@ -63,10 +63,10 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     if (updateItems)
     {
         Console.WriteLine("Update Items(s)");
-        UpdateMultipleItems();
+        await UpdateMultipleItems();
         Console.WriteLine("Items updated");
 
-        var inventory2 = itemsService.GetItems();
+        var inventory2 = await itemsService.GetItems();
         inventory2.ForEach(x => Console.WriteLine($"Item: {x}"));
     }
 
@@ -77,10 +77,10 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     if (deleteItems)
     {
         Console.WriteLine("Deleting Items(s)");
-        DeleteMultipleItems();
+        await DeleteMultipleItems();
         Console.WriteLine("Items deleted");
 
-        var inventory3 = itemsService.GetItems();
+        var inventory3 = await itemsService.GetItems();
         inventory3.ForEach(x => Console.WriteLine($"Item: {x}"));
     }
 
@@ -144,41 +144,41 @@ void EnsureItem(string name, string description, string notes)
     }
 }
 
-void ListInventory()
+async Task ListInventory()
 {
-    var res = itemsService.GetItems();
+    var res = await itemsService.GetItems();
     res.ForEach(x => Console.WriteLine($"New Item: {x}"));
 }
 
-void DeleteAllItems()
+async Task DeleteAllItems()
 {
     using (var db = new InventoryDbContext(optionsBuilder.Options))
     {
-        var items = db.Items.ToList();
+        var items = await db.Items.ToListAsync();
         db.Items.RemoveRange(items);
 
-        db.SaveChanges();
+        await db.SaveChangesAsync();
     }
 }
 
-void UpdateItems()
+async Task UpdateItems()
 {
     using (var db = new InventoryDbContext(optionsBuilder.Options))
     {
-        var items = db.Items.ToList();
+        var items = await db.Items.ToListAsync();
         foreach (var item in items)
         {
             item.CurrentOrFinalPrice = 9.99M;
         }
 
         db.Items.UpdateRange(items);
-        db.SaveChanges();
+        await db.SaveChangesAsync();
     }
 }
 
-void GetItemsForListing()
+async Task GetItemsForListing()
 {
-    var res = itemsService.GetItemsForListingFromProcedure();
+    var res = await itemsService.GetItemsForListingFromProcedure();
 
     foreach (var item in res)
     {
@@ -192,14 +192,14 @@ void GetItemsForListing()
     }
 }
 
-void GetAllActiveItemsAsPipeDelimitedString()
+async Task GetAllActiveItemsAsPipeDelimitedString()
 {
-    Console.WriteLine($"All ctive Items: {itemsService.GetAllItemsPipeDelimitedString()}");
+    Console.WriteLine($"All ctive Items: {await itemsService.GetAllItemsPipeDelimitedString()}");
 }
 
-void GetItemsTotalValues()
+async Task GetItemsTotalValues()
 {
-    var res = itemsService.GetItemsTotalValue(true);
+    var res = await itemsService.GetItemsTotalValue(true);
 
     foreach (var item in res)
     {
@@ -207,9 +207,9 @@ void GetItemsTotalValues()
     }
 }
 
-void GetFullItemsDetails()
+async Task GetFullItemsDetails()
 {
-    var res = itemsService.GetItemsWithGenresAndCategories();
+    var res = await itemsService.GetItemsWithGenresAndCategories();
 
     foreach (var item in res)
     {
@@ -217,33 +217,31 @@ void GetFullItemsDetails()
     }
 }
 
-void GetItemsForListingLinq()
+async Task GetItemsForListingLinq()
 {
     var minDateValue = new DateTime(2021, 1, 1);
     var maxDateValue = new DateTime(2024, 1, 1);
 
-    var res = itemsService.GetItemsByDateRange(minDateValue, maxDateValue)
-        .OrderBy(y => y.CategoryName)
-        .ThenBy(z => z.Name);
+    var res = await itemsService.GetItemsByDateRange(minDateValue, maxDateValue);
 
-    foreach (var item in res)
+    foreach (var item in res.OrderBy(y => y.CategoryName).ThenBy(z => z.Name))
     {
         Console.WriteLine(item);
     }
 }
 
-void ListCategoriesAndColors()
+async Task ListCategoriesAndColors()
 {
     using (var db = new InventoryDbContext(optionsBuilder.Options))
     {
-        var res = categoriesService.ListCategoriesAndDetails();
+        var res = await categoriesService.ListCategoriesAndDetails();
         categories = res;
 
         res.ForEach(x => Console.WriteLine($"Category: {x.Category} is {x.CategoryDetail.Color}"));
     }
 }
 
-void CreateMultipleItems()
+async Task CreateMultipleItems()
 {
     Console.WriteLine("Would you like to create items as a batch?");
     var batchCreate = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
@@ -269,7 +267,7 @@ void CreateMultipleItems()
 
         if (!batchCreate)
         {
-            itemsService.UpsertItem(newItem);
+            await itemsService.UpsertItem(newItem);
         }
         else
         {
@@ -281,7 +279,7 @@ void CreateMultipleItems()
 
         if (batchCreate && !createAnother)
         {
-            itemsService.UpsertItems(allItems);
+            await itemsService.UpsertItems(allItems);
         }
     }
 }
@@ -301,7 +299,7 @@ int GetCategoryId(string input)
     }
 }
 
-void UpdateMultipleItems()
+async Task UpdateMultipleItems()
 {
     Console.WriteLine("Would you like to update items as a batch?");
     bool batchUpdate = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
@@ -315,7 +313,7 @@ void UpdateMultipleItems()
         Console.WriteLine("Enter the ID number to update");
         Console.WriteLine("*******************************");
 
-        var items = itemsService.GetItems();
+        var items = await itemsService.GetItems();
         items.ForEach(x => Console.WriteLine($"ID: {x.Id} | {x.Name}"));
 
         Console.WriteLine("*******************************");
@@ -355,7 +353,7 @@ void UpdateMultipleItems()
 
                 if (!batchUpdate)
                 {
-                    itemsService.UpsertItem(updItem);
+                    await itemsService.UpsertItem(updItem);
                 }
                 else
                 {
@@ -369,12 +367,12 @@ void UpdateMultipleItems()
 
         if (batchUpdate && !updateAnother)
         {
-            itemsService.UpsertItems(allItems);
+            await itemsService.UpsertItems(allItems);
         }
     }
 }
 
-void DeleteMultipleItems()
+async Task DeleteMultipleItems()
 {
     Console.WriteLine("Would you like to delete items as a batch?");
     bool batchDelete = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
@@ -388,7 +386,7 @@ void DeleteMultipleItems()
         Console.WriteLine("Enter the ID number to delete"); 
         Console.WriteLine("*******************************"); 
 
-        var items = itemsService.GetItems();
+        var items = await itemsService.GetItems();
         items.ForEach(x => Console.WriteLine($"ID: {x.Id} | {x.Name}"));
 
         Console.WriteLine("*******************************"); 
@@ -420,7 +418,7 @@ void DeleteMultipleItems()
                     Console.WriteLine($"Are you sure you want to delete the item {itemMatch.Id}-{itemMatch.Name}");
                     if (Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase))
                     {
-                        itemsService.DeleteItem(itemMatch.Id); 
+                        await itemsService.DeleteItem(itemMatch.Id); 
                         Console.WriteLine("Item Deleted");
                     }
                 }
@@ -438,7 +436,7 @@ void DeleteMultipleItems()
 
             if (Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase))
             {
-                itemsService.DeleteItems(allItems); Console.WriteLine("Items Deleted");
+                await itemsService.DeleteItems(allItems); Console.WriteLine("Items Deleted");
             }
         }
     }

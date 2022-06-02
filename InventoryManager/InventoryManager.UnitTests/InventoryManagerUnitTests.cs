@@ -8,6 +8,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using Shouldly;
+using System.Threading.Tasks;
 
 namespace InventoryManager.UnitTests
 {
@@ -45,7 +46,7 @@ namespace InventoryManager.UnitTests
             _itemsRepo = new Mock<IItemsRepo>();
             var items = GetItemsTestData();
 
-            _itemsRepo.Setup(x => x.GetItems()).Returns(items);
+            _itemsRepo.Setup(x => x.GetItems()).Returns(Task.FromResult(items));
         }
 
         private List<Item> GetItemsTestData()
@@ -92,9 +93,9 @@ namespace InventoryManager.UnitTests
         }
 
         [TestMethod]
-        public void TestGetItems()
+        public async Task TestGetItems()
         {
-            var res = _itemsService.GetItems();
+            var res = await _itemsService.GetItems();
 
             res.ShouldNotBeNull();
             res.Count.ShouldBe(3);

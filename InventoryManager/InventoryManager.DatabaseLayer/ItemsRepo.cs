@@ -37,10 +37,9 @@ namespace InventoryManager.DatabaseLayer
             var items = await context.Items
                 .Include(x => x.Category)
                 .Where(x => !x.IsDeleted)
-                .OrderBy(x => x.Name)
                 .ToListAsync();
 
-            return items;
+            return items.OrderBy(x => x.Name).ToList();
         }
 
         public async Task<List<ItemDto>> GetItemsByDateRange(DateTime minDateValue, DateTime maxDateValue)
@@ -70,13 +69,15 @@ namespace InventoryManager.DatabaseLayer
 
         public async Task<List<FullItemDetailDto>> GetItemsWithGenresAndCategories()
         {
-            return await context.FullItemDetailDtos
+            var res = await context.FullItemDetailDtos
                 .FromSqlRaw("SELECT * FROM [dbo].[vwFullItemDetails]")
-                .OrderBy(x => x.ItemName)
+                .ToListAsync();
+
+            return res.OrderBy(x => x.ItemName)
                 .ThenBy(x => x.GenreName)
                 .ThenBy(x => x.Category)
                 .ThenBy(x => x.PlayerName)
-                .ToListAsync();
+                .ToList();
         }
 
         public async Task<int> UpsertItem(Item item)
@@ -96,15 +97,12 @@ namespace InventoryManager.DatabaseLayer
             await context.Items.AddAsync(item);
             await context.SaveChangesAsync();
 
-            var newItem = await context.Items
-                .FirstOrDefaultAsync(x => x.Name.ToLower().Equals(item.Name.ToLower()));
-
-            if (newItem == null)
+            if (item.Id <= 0)
             {
                 throw new Exception("Could not Create the item as expected");
             }
 
-            return newItem.Id;
+            return item.Id;
         }
 
         private async Task<int> UpdateItem(Item item)
@@ -152,7 +150,10 @@ namespace InventoryManager.DatabaseLayer
 
         public async Task UpsertItems(List<Item> items)
         {
-            using (var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }))
+            using (var scope = new TransactionScope(
+                TransactionScopeOption.Required,
+                new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted },
+                TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -180,7 +181,10 @@ namespace InventoryManager.DatabaseLayer
 
         public async Task DeteleItems(List<int> itemIds)
         {
-            using (var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }))
+            using (var scope = new TransactionScope(
+                TransactionScopeOption.Required, 
+                new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }, 
+                TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {

@@ -15,6 +15,6 @@ namespace InventoryManager.Models
 
         public virtual List<Item> Items { get; set; } = new List<Item>();
 
-        public virtual CategoryDetail CategoryDetail { get; set; }
+        public virtual CategoryDetail? CategoryDetail { get; set; }
     }
 }

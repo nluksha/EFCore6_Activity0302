@@ -7,13 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-var inventoryManagerConnectionString = builder.Configuration.GetConnectionString("InventoryManagerConnection");
+var inventoryManagerConnectionString = builder.Configuration.GetConnectionString("InventoryManager");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDbContext<InventoryDbContext>(options =>
-    options.UseSqlServer(inventoryManagerConnectionString)
-);
+    options.UseSqlServer(inventoryManagerConnectionString));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)

@@ -10,6 +10,7 @@ using AutoMapper;
 using InventoryManager.Models.DTOs;
 using AutoMapper.QueryableExtensions;
 using InventoryManager.BusinessLayer;
+using System.Transactions;
 
 IConfigurationRoot configuration;
 DbContextOptionsBuilder<InventoryDbContext> optionsBuilder;
@@ -43,7 +44,9 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     //await ListCategoriesAndColors();
 
     //await ExploreManyToManyRelationships(db);
-    await EnsureItemsHaveGenres(db);
+    //await EnsureItemsHaveGenres(db);
+    await DemonstateSplitQueries(db);
+
 
     /*
     // Insert
@@ -91,6 +94,29 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     Console.WriteLine("Program Completed");
     */
 
+}
+
+async Task DemonstateSplitQueries(InventoryDbContext db)
+{
+    using (var scope = new TransactionScope(TransactionScopeOption.Required,
+        new TransactionOptions { IsolationLevel = IsolationLevel.Serializable },
+        TransactionScopeAsyncFlowOption.Enabled))
+    {
+        var fullItemDetails = await db.Items
+            .Include(x => x.Players)
+            .Include(x => x.ItemGenres).ThenInclude(y => y.Genre)
+            .Include(x => x.Category)
+            .Where(x => x.IsActive && !x.IsDeleted)
+            .AsSplitQuery()
+            .AsNoTracking()
+            .ToListAsync();
+
+        var outputItems = mapper.Map<List<ItemDto>>(fullItemDetails);
+        foreach (var item in outputItems)
+        {
+            Console.WriteLine($"NEW Item : {item}");
+        }
+    }
 }
 
 async Task EnsureItemsHaveGenres(InventoryDbContext db)

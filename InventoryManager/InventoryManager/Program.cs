@@ -42,7 +42,8 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     //await GetItemsForListingLinq();
     //await ListCategoriesAndColors();
 
-    await ExploreManyToManyRelationships(db);
+    //await ExploreManyToManyRelationships(db);
+    await EnsureItemsHaveGenres(db);
 
     /*
     // Insert
@@ -90,6 +91,75 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     Console.WriteLine("Program Completed");
     */
 
+}
+
+async Task EnsureItemsHaveGenres(InventoryDbContext db)
+{
+    Console.WriteLine(new String('*', 80));
+    Console.WriteLine(new String('*', 80));
+    var nonFilteredItems = await db.Items.AsNoTracking().Include(x => x.Players).ToListAsync();
+    var allPlayers = new List<Player>();
+
+    foreach (var item in nonFilteredItems)
+    {
+        foreach (var player in item.Players)
+        {
+            allPlayers.Add(player);
+        }
+    }
+
+    Console.WriteLine("Non-filtered Items:");
+    allPlayers.ForEach(x => Console.WriteLine(x.Name));
+
+    Console.WriteLine(new String('*', 80));
+    Console.WriteLine(new String('*', 80));
+    var filteredItems = await db.Items
+        .AsNoTracking()
+        .Include(
+        item => item.Players.Where(
+            p => p.Name.Contains("ar")
+            )
+        ).ToListAsync();
+
+    var filteredPlayers = new List<Player>();
+    foreach (var fi in filteredItems)
+    {
+        foreach (var player in fi.Players)
+        {
+            filteredPlayers.Add(player);
+        }
+    }
+
+    Console.WriteLine("Filtered Players");
+    filteredPlayers.ForEach(x => Console.WriteLine(x.Name));
+
+    Console.WriteLine(new String('*', 80));
+    Console.WriteLine(new String('*', 80));
+    var selectFilteredItems = await db.Items.AsNoTracking()
+        .Select(item => new
+        {
+            Id = item.Id,
+            Name = item.Name,
+            Players = item.Players
+        .Where(p => p.Name.Contains("ar"))
+        .Select(pl => new Player
+        {
+            Id = pl.Id,
+            Name = pl.Name
+        }).ToList()
+        }).ToListAsync();
+
+    var selectedFilteredPlayers = new List<Player>();
+    foreach (var fi in selectFilteredItems)
+    {
+        foreach (var player in fi.Players)
+        {
+            selectedFilteredPlayers.Add(player);
+        }
+    }
+
+    Console.WriteLine("Selected [Projected] Filtered Players");
+    selectedFilteredPlayers.ForEach(x => Console.WriteLine(x.Name));
 }
 
 async Task ExploreManyToManyRelationships(InventoryDbContext db)

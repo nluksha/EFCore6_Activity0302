@@ -45,7 +45,8 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
 
     //await ExploreManyToManyRelationships(db);
     //await EnsureItemsHaveGenres(db);
-    await DemonstateSplitQueries(db);
+    //await DemonstateSplitQueries(db);
+    await DemoSimpleLogging(db);
 
 
     /*
@@ -94,6 +95,23 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     Console.WriteLine("Program Completed");
     */
 
+}
+
+async Task DemoSimpleLogging(InventoryDbContext db)
+{
+    var fullItemDetails = await db.Items
+        .Include(x => x.Players)
+        .Include(x => x.ItemGenres).ThenInclude(y => y.Genre)
+        .Include(x => x.Category)
+        .Where(x => x.IsActive && !x.IsDeleted)
+        .AsNoTracking()
+        .ToListAsync();
+
+    var outputItems = mapper.Map<List<ItemDto>>(fullItemDetails);
+    foreach (var item in outputItems)
+    {
+        Console.WriteLine($"NEW Item : {item}");
+    }
 }
 
 async Task DemonstateSplitQueries(InventoryDbContext db)

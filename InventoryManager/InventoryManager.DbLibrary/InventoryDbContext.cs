@@ -48,6 +48,8 @@ namespace InventoryManager.DbLibrary
 
                 optionsBuilder.UseSqlServer(connectionString);
             }
+
+            optionsBuilder.LogTo(Console.WriteLine);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -34,14 +34,17 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     itemsService = new ItemsService(db, mapper);
     categoriesService = new CategoriesService(db, mapper);
 
-    await ListInventory();
-    await GetItemsForListing();
-    await GetAllActiveItemsAsPipeDelimitedString();
-    await GetItemsTotalValues();
-    await GetFullItemsDetails();
-    await GetItemsForListingLinq();
-    await ListCategoriesAndColors();
+    //await ListInventory();
+    //await GetItemsForListing();
+    //await GetAllActiveItemsAsPipeDelimitedString();
+    //await GetItemsTotalValues();
+    //await GetFullItemsDetails();
+    //await GetItemsForListingLinq();
+    //await ListCategoriesAndColors();
 
+    await ExploreManyToManyRelationships(db);
+
+    /*
     // Insert
     Console.WriteLine("Would you like to create items?");
     var createItems = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
@@ -85,7 +88,32 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     }
 
     Console.WriteLine("Program Completed");
+    */
 
+}
+
+async Task ExploreManyToManyRelationships(InventoryDbContext db)
+{
+    var items = await db.Items
+        .Include(i => i.Players)
+        .Include(i => i.ItemGenres).ThenInclude(ig => ig.Genre)
+        .Where(i => !i.IsDeleted && i.IsActive)
+        .ToListAsync();
+
+    foreach (var item in items)
+    {
+        Console.WriteLine($"New Item: {item.Name} found...");
+
+        foreach (var itemGenre in item.ItemGenres)
+        {
+            Console.WriteLine($"Item {item.Name} has genre {itemGenre.Genre.Name}");
+        }
+
+        foreach (var player in item.Players)
+        {
+            Console.WriteLine($"Item {item.Name} has player {player.Name}");
+        }
+    }
 }
 
 void BuildOptions()

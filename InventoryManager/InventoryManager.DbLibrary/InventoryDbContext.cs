@@ -15,6 +15,8 @@ namespace InventoryManager.DbLibrary
         public DbSet<CategoryDetail> CategoryDetails { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<Manufacturer> Manufacturers { get; set; }
+        public DbSet<Company> Companies { get; set; }
+        public DbSet<Person> People { get; set; }
 
         // Stored Procedures
         public DbSet<GetItemsForListingDto> ItemsForLisitng { get; set; }

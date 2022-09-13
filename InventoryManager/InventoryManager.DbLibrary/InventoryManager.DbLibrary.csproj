@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Migrations\Scripts\CustomScripts\MigratePlayers.v0.sql" />
     <None Remove="Migrations\Scripts\Functions\GetItemsTotalValue\GetItemsTotalValue.v0.sql" />
     <None Remove="Migrations\Scripts\Functions\ItemNamesPipeDeliminatedString\ItemNamesPipeDeliminatedString.v0.sql" />
     <None Remove="Migrations\Scripts\Procedures\GetItemsForListing\GetItemsForListing.v0.sql" />
@@ -15,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Migrations\Scripts\CustomScripts\MigratePlayers.v0.sql" />
     <EmbeddedResource Include="Migrations\Scripts\Functions\GetItemsTotalValue\GetItemsTotalValue.v0.sql" />
   </ItemGroup>
 

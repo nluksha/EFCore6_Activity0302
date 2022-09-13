@@ -47,6 +47,7 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     //await EnsureItemsHaveGenres(db);
     //await DemonstateSplitQueries(db);
     //await DemoSimpleLogging(db);
+    await ShowPlayerTPTData(db);
 
 
     /*
@@ -95,6 +96,45 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     Console.WriteLine("Program Completed");
     */
 
+}
+
+async Task ShowPlayerTPTData(InventoryDbContext db)
+{
+    var people = await db.People.ToListAsync();
+
+    var items = await db.Items
+        .Include(x => x.Players)
+        .ToListAsync();
+
+    if (items != null && items.Any())
+    {
+        foreach (var item in items)
+        {
+            var players = item.Players;
+
+            if (players == null || !players.Any()) continue;
+
+            Console.WriteLine($"New Item with players: {item.Name}: ");
+
+            foreach (var player in players)
+            {
+                if (player is Person)
+                {
+                    var p = player as Person;
+                    Console.WriteLine($"{p.LastName}, {p.FirstName} -- {p.Name}");
+                }
+                else if (player is Company)
+                {
+                    var c = player as Company;
+                    Console.WriteLine($"{c.CompanyName} - {c.City} -- {c.Name}");
+                }
+                else
+                {
+                    Console.WriteLine($"Player only: {player.Name}");
+                }
+            }
+        }
+    }
 }
 
 async Task DemoSimpleLogging(InventoryDbContext db)
@@ -519,25 +559,25 @@ async Task DeleteMultipleItems()
     Console.WriteLine("Would you like to delete items as a batch?");
     bool batchDelete = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
 
-    var allItems = new List<int>(); 
-    bool deleteAnother = true; 
-    
+    var allItems = new List<int>();
+    bool deleteAnother = true;
+
     while (deleteAnother == true)
     {
         Console.WriteLine("Items");
-        Console.WriteLine("Enter the ID number to delete"); 
-        Console.WriteLine("*******************************"); 
+        Console.WriteLine("Enter the ID number to delete");
+        Console.WriteLine("*******************************");
 
         var items = await itemsService.GetItems();
         items.ForEach(x => Console.WriteLine($"ID: {x.Id} | {x.Name}"));
 
-        Console.WriteLine("*******************************"); 
+        Console.WriteLine("*******************************");
 
         if (batchDelete && allItems.Any())
         {
-            Console.WriteLine("Items scheduled for delete"); 
+            Console.WriteLine("Items scheduled for delete");
             allItems.ForEach(x => Console.Write($"{x},"));
-            Console.WriteLine(); 
+            Console.WriteLine();
             Console.WriteLine("*******************************");
         }
 
@@ -560,7 +600,7 @@ async Task DeleteMultipleItems()
                     Console.WriteLine($"Are you sure you want to delete the item {itemMatch.Id}-{itemMatch.Name}");
                     if (Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase))
                     {
-                        await itemsService.DeleteItem(itemMatch.Id); 
+                        await itemsService.DeleteItem(itemMatch.Id);
                         Console.WriteLine("Item Deleted");
                     }
                 }

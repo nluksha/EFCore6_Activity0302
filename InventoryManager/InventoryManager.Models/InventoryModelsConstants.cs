@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace InventoryManager.Models
 {
-    public class InventoryModelsConstans
+    public class InventoryModelsConstants
     {
         public const int MAX_DESCRIPTION_LENGTH = 250;
         public const int MAX_NAME_LENGTH = 100;
@@ -26,5 +26,11 @@ namespace InventoryManager.Models
         public const int MAX_PLAYERDESCRIPTION_LENGTH = 500;
 
         public const int MAX_GENRENAME_LENGTH = 50;
+
+        public const int MAX_STOCKSYMBOL_LENGTH = 10;
+        public const int MAX_COMPANYNAME_LENGTH = 150;
+        public const int MAX_CITY_LENGTH = 50;
+        public const int MAX_FIRSTNAME_LENGTH = 50;
+        public const int MAX_LASTNAME_LENGTH = 50;
     }
 }

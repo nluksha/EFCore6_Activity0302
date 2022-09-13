@@ -11,7 +11,7 @@ namespace InventoryManager.Models
     public class Genre: FullAuditModel
     {
         [Required]
-        [StringLength(InventoryModelsConstans.MAX_GENRENAME_LENGTH)]
+        [StringLength(InventoryModelsConstants.MAX_GENRENAME_LENGTH)]
         public string Name { get; set; }
 
         public virtual List<ItemGenge> GenreItems { get; set; } = new List<ItemGenge>();

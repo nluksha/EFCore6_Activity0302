@@ -12,10 +12,10 @@ namespace InventoryManager.Models
     public class Player: FullAuditModel
     {
         [Required]
-        [StringLength(InventoryModelsConstans.MAX_PLAYERNAME_LENGTH)]
-        public string Name { get; set; }
+        [StringLength(InventoryModelsConstants.MAX_PLAYERNAME_LENGTH)]
+        public virtual string Name { get; set; }
 
-        [StringLength(InventoryModelsConstans.MAX_PLAYERDESCRIPTION_LENGTH)]
+        [StringLength(InventoryModelsConstants.MAX_PLAYERDESCRIPTION_LENGTH)]
         public string? Description { get; set; }
 
         public virtual List<Item> Items { get; set; } = new List<Item>();

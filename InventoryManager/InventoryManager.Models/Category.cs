@@ -10,7 +10,7 @@ namespace InventoryManager.Models
     public class Category: FullAuditModel
     {
         [Required]
-        [StringLength(InventoryModelsConstans.MAX_NAME_LENGTH)]
+        [StringLength(InventoryModelsConstants.MAX_NAME_LENGTH)]
         public string Name { get; set; }
 
         public virtual List<Item> Items { get; set; } = new List<Item>();

@@ -14,11 +14,11 @@ namespace InventoryManager.Models
         [Key]
         public int Id { get; set; }
 
-        [StringLength(InventoryModelsConstans.MAX_USERID_LENGTH)]
+        [StringLength(InventoryModelsConstants.MAX_USERID_LENGTH)]
         public string? CreatedByUserId { get; set; }
         public DateTime CreatedDate { get; set; }
 
-        [StringLength(InventoryModelsConstans.MAX_USERID_LENGTH)]
+        [StringLength(InventoryModelsConstants.MAX_USERID_LENGTH)]
         public string? LastModifiedUserId { get; set; }
         public DateTime? LastModifiedDate { get; set; }
         public bool IsActive { get; set; }

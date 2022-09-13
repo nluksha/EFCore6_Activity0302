@@ -7,25 +7,25 @@ namespace InventoryManager.Models
     {
         [Required]
         [Column(TypeName = "VARCHAR")]
-        [StringLength(InventoryModelsConstans.MAX_NAME_LENGTH)]
+        [StringLength(InventoryModelsConstants.MAX_NAME_LENGTH)]
         public string Name { get; set; }
 
-        [Range(InventoryModelsConstans.MINIMUM_QAUNTITY, InventoryModelsConstans.MAXIMUM_QAUNTITY)]
+        [Range(InventoryModelsConstants.MINIMUM_QAUNTITY, InventoryModelsConstants.MAXIMUM_QAUNTITY)]
         public int Quantity { get; set; }
 
-        [StringLength(InventoryModelsConstans.MAX_DESCRIPTION_LENGTH)]
+        [StringLength(InventoryModelsConstants.MAX_DESCRIPTION_LENGTH)]
         public string? Description { get; set; }
 
-        [StringLength(InventoryModelsConstans.MAX_NOTES_LENGTH, MinimumLength = InventoryModelsConstans.MIN_NOTES_LENGTH)]
+        [StringLength(InventoryModelsConstants.MAX_NOTES_LENGTH, MinimumLength = InventoryModelsConstants.MIN_NOTES_LENGTH)]
         public string? Notes { get; set; }
         public bool IsOnSale { get; set; }
         public DateTime? PurchasedDate { get; set; }
         public DateTime? SoldDate { get; set; }
 
-        [Range(InventoryModelsConstans.MINIMUM_PRICE, InventoryModelsConstans.MAXIMUM_PRICE)]
+        [Range(InventoryModelsConstants.MINIMUM_PRICE, InventoryModelsConstants.MAXIMUM_PRICE)]
         public decimal? PurchasePrice { get; set; }
 
-        [Range(InventoryModelsConstans.MINIMUM_PRICE, InventoryModelsConstans.MAXIMUM_PRICE)]
+        [Range(InventoryModelsConstants.MINIMUM_PRICE, InventoryModelsConstants.MAXIMUM_PRICE)]
         public decimal? CurrentOrFinalPrice { get; set; }
 
         public int? CategoryId { get; set; }

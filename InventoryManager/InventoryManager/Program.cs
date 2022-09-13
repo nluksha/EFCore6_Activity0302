@@ -46,7 +46,7 @@ using (var db = new InventoryDbContext(optionsBuilder.Options))
     //await ExploreManyToManyRelationships(db);
     //await EnsureItemsHaveGenres(db);
     //await DemonstateSplitQueries(db);
-    await DemoSimpleLogging(db);
+    //await DemoSimpleLogging(db);
 
 
     /*
